@@ -23,7 +23,7 @@
 // with no trailing newline and nothing else, to /output/entry.txt — exactly
 // what the gate requires (UTF-8 text of 1 to 1 characters).
 
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 // The one letter of the entry.
@@ -36,5 +36,12 @@ const outFile = join(outDir, "entry.txt");
 
 mkdirSync(outDir, { recursive: true });
 writeFileSync(outFile, LETTER, "utf8");
+
+// Self-check: the gate requires UTF-8 text of exactly 1 character, A to Z.
+// Fail loudly instead of shipping a bad artifact.
+const written = readFileSync(outFile, "utf8");
+if (!/^[A-Z]$/.test(written)) {
+  throw new Error(`invalid entry: expected exactly one letter A-Z, got ${JSON.stringify(written)}`);
+}
 
 console.log(`wrote ${JSON.stringify(LETTER)} (${LETTER.length} byte) to ${outFile}`);
